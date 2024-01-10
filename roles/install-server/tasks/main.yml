@@ -1,0 +1,28 @@
+- name: aptでnfs-kernel-serverをインストールする。
+  ansible.builtin.apt:
+    update_cache: true
+    name: nfs-kernel-server
+- name: nfsサーバーで利用する共有ディレクトリを作成する
+  ansible.builtin.file:
+    path: "{{ nfs_dir_path }}"
+    owner: nobody
+    group: nogroup
+    mode: 0777
+    recurse: true
+- name: 既存の/etc/exportsを削除
+  file:
+    path: /etc/exports
+    state: absent
+- name: クライアントを登録
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    line: '{{ nfs_dir_path }} {{ item }}(rw,no_subtree_check,no_root_squash)'
+    create: true
+  with_items:
+    "{{ clients_ips }}"
+- name: nfs-serverをリスタート
+  ansible.builtin.service:
+    name: nfs-server
+    state: restarted
+
+
