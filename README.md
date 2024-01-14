@@ -10,6 +10,14 @@ roles/install-server/files/allowed_ports.yml.example
 nfsサーバーではデフォルトでipが固定されない通信が発生するようなので(mountd, lockdなどで)
 このファイルのポートを編集して任意のポートに固定してください。ポートの開放はプレイブックないで行われます。
 
+playbook.yml内の  
+```playbook.yml
+vars:  
+  nfs_dir_path: /export/shared  
+```
+を変更するとマウント先のディレクトリを変更できます。  
+
+
 ### 実行  
 プロジェクトルートで  
 ansible-playbook -i inventory.ini playbook.yml  
