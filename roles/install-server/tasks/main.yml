@@ -9,20 +9,66 @@
     group: nogroup
     mode: 0777
     recurse: true
-- name: 既存の/etc/exportsを削除
+- name: nfs-commonをアップロード
+  template:
+    src: ../files/nfs-common.j2
+    dest: /etc/default/nfs-common
+- name: nfs-kernel-serverをアップロード
+  template:
+    src: ../files/nfs-kernel-server.j2
+    dest: /etc/default/nfs-kernel-server
+- name: options.localをアップロード
+  template:
+    src: ../files/options.local.j2
+    dest: /etc/modprobe.d/local.conf
+- name: 再起動
+  reboot:
+- name: 既存の設定ファイル(/etc/exports)を削除
   file:
     path: /etc/exports
     state: absent
 - name: クライアントを登録
   ansible.builtin.lineinfile:
-    path: /etc/exports
-    line: '{{ nfs_dir_path }} {{ item }}(rw,no_subtree_check,no_root_squash)'
+    path: "/etc/exports" # 設定ファイルの場所
+    line: "{{ nfs_dir_path }} {{ item }}(rw,no_subtree_check,no_root_squash)"
     create: true
-  with_items:
-    "{{ clients_ips }}"
+  with_items: "{{ groups['clients'] }}"
 - name: nfs-serverをリスタート
   ansible.builtin.service:
     name: nfs-server
     state: restarted
-
-
+- name: 2049ポートを開放
+  ansible.builtin.ufw:
+    port: 2049 
+    rule: allow
+    from_ip: "{{ item }}"
+    state: enabled
+  loop: "{{ groups['clients'] }}"
+- name: "{{ nlm_udpport }}を開放" 
+  ansible.builtin.ufw:
+    port: "{{ nlm_udpport }}"
+    rule: allow
+    from_ip: "{{ item }}"
+    state: enabled
+  loop: "{{ groups['clients'] }}"
+- name: "{{ nlm_tcpport }}を開放" 
+  ansible.builtin.ufw:
+    port: "{{ nlm_tcpport }}"
+    rule: allow
+    from_ip: "{{ item }}"
+    state: enabled
+  loop: "{{ groups['clients'] }}"
+- name: "{{ STATDOPTS }}を開放" 
+  ansible.builtin.ufw:
+    port: "{{ STATDOPTS }}"
+    rule: allow
+    from_ip: "{{ item }}"
+    state: enabled
+  loop: "{{ groups['clients'] }}"
+- name: "{{ RPCMOUNTDOPTS }}を開放" 
+  ansible.builtin.ufw:
+    port: "{{ RPCMOUNTDOPTS }}"
+    rule: allow
+    from_ip: "{{ item }}"
+    state: enabled
+  loop: "{{ groups['clients'] }}"

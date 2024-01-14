@@ -2,10 +2,10 @@
   hosts:
     - target
   become: true
+  vars_files:
+    - ./roles/install-server/files/allowed_ports.yml 
   vars:
     nfs_dir_path: /export/shared
-    clients_ips:
-      "{{ groups['clients'] }}"
   roles:
     - { role: install-server, tags: install-server }
 - name: クライアントにnfs-commonをインストール
