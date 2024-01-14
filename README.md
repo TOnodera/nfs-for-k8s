@@ -11,10 +11,10 @@ nfsサーバーではデフォルトでipが固定されない通信が発生す
 このファイルのポートを編集して任意のポートに固定してください。ポートの開放はプレイブックないで行われます。
 
 ### 実行  
-プロジェクトルートで
-ansible-playbook -i inventory.ini playbook.yml
+プロジェクトルートで  
+ansible-playbook -i inventory.ini playbook.yml  
 を実行するとnfs-kernel-serverが設置され、クライアントにはnfs-commonがインストールされます。
 
-クライアント側で
-sudo mount -t nfs [server_ip]:/path/to/nfsdir /path/to/mountdir
+クライアント側で  
+sudo mount -t nfs [server_ip]:/path/to/nfsdir /path/to/mountdir  
 でマウントできるか確認してください。
